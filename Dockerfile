@@ -16,6 +16,9 @@ ARG DEV=false
 # A single line command that creates a virtual environment and installs the dependencies in it.
 RUN python -m venv /py && \
     /py/bin/pip install --upgrade pip && \
+    apk add --update --no-cache postgresql-client && \
+    apk add --update --no-cache --virtual .tmp-build-deps \
+        build-base postgresql-dev musl-dev && \
     /py/bin/pip install -r /tmp/requirements.txt && \
     # Install dev requirements.
     if [ $DEV = "true" ]; \
@@ -23,6 +26,7 @@ RUN python -m venv /py && \
     fi && \
     # Remove temporary files.
     rm -rf /tmp && \
+    apk del .tmp-build-deps && \
     # Create a non-root user.
     adduser \
         --disabled-password \
