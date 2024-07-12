@@ -22,6 +22,23 @@ class UserSerializer(serializers.ModelSerializer):
         """Create and return a user with encrypted password."""
         return get_user_model().objects.create_user(**validated_data)
 
+    def update(self, instance, validated_data):
+        """Update and return user."""
+        # Remove the password from the validated data.
+        password = validated_data.pop('password', None)
+        # Update the user
+        user = super().update(instance, validated_data)
+
+        # If the password is passed, set_password will encrypt the password.
+        # save is needed to store the new password in the database.
+        if password:
+            # set_password will encrypt the password.
+            user.set_password(password)
+            # save is needed to store the new password in the database.
+            user.save()
+
+        return user
+
 
 # Basic serializer that is used to create a token
 # for the user. It is not tight to an specific model.

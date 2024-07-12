@@ -1,7 +1,11 @@
 """
 Views for the user API.
 """
-from rest_framework import generics
+from rest_framework import (
+    generics,
+    authentication,
+    permissions
+)
 from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.settings import api_settings
 
@@ -27,3 +31,41 @@ class CreateTokenView(ObtainAuthToken):
     # The default renderer classes are configured in the
     # `REST_FRAMEWORK` setting in settings.py.
     renderer_classes = api_settings.DEFAULT_RENDERER_CLASSES
+
+
+class ManageUserView(generics.RetrieveUpdateAPIView):
+    """
+    Manage the authenticated user.
+
+    This view class is used to retrieve and update the
+    authenticated user. The view is used to handle HTTP
+    GET and PATCH requests.
+
+    Attributes:
+        serializer_class (class): The serializer class used to
+            serialize the user object.
+        authentication_classes (list): The authentication classes
+            used to authenticate the user.
+        permission_classes (list): The permission classes used to
+            check the permissions of the user.
+
+    Methods:
+        get_object(): Retrieves and returns the authenticated user.
+    """
+    serializer_class = UserSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_object(self):
+        """
+        Retrieves and returns the authenticated user.
+
+        This method retrieves the authenticated user object from
+        the request object and returns it. The user object isurl
+        obtained by calling the `user` attribute of the request
+        object.
+
+        Returns:
+            The authenticated user object.
+        """
+        return self.request.user
