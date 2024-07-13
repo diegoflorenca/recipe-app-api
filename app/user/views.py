@@ -36,7 +36,12 @@ class CreateTokenView(ObtainAuthToken):
 class ManageUserView(generics.RetrieveUpdateAPIView):
     """
     Manage the authenticated user.
+    """
+    serializer_class = UserSerializer
+    authentication_classes = [authentication.TokenAuthentication]
+    permission_classes = [permissions.IsAuthenticated]
 
+    """
     This view class is used to retrieve and update the
     authenticated user. The view is used to handle HTTP
     GET and PATCH requests.
@@ -52,9 +57,6 @@ class ManageUserView(generics.RetrieveUpdateAPIView):
     Methods:
         get_object(): Retrieves and returns the authenticated user.
     """
-    serializer_class = UserSerializer
-    authentication_classes = [authentication.TokenAuthentication]
-    permission_classes = [permissions.IsAuthenticated]
 
     def get_object(self):
         """
