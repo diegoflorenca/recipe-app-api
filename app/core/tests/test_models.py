@@ -1,8 +1,13 @@
 """
 Tests for models.
 """
+# Store the price values of the recipe model.
+from decimal import Decimal
+
 from django.test import TestCase
 from django.contrib.auth import get_user_model
+
+from core import models
 
 
 class ModelTests(TestCase):
@@ -47,3 +52,26 @@ class ModelTests(TestCase):
 
         self.assertTrue(user.is_superuser)
         self.assertTrue(user.is_staff)
+
+    def test_create_recipe(self):
+        """Test creating a recipe is successful."""
+        # We create a user and assign it to the recipe.
+        user = get_user_model().objects.create_user(
+            'test@example.com',
+            'testpass123',
+        )
+        """
+        It is not a good practice to sue Decimal for price values.
+        The decimal could lead to unexpected behavior when converting.
+        However, we are not going to use this field for any kind of
+        price calculation.
+        """
+        recipe = models.Recipe.objects.create(
+            user=user,
+            title='Sample recipe name',
+            time_minutes=5,
+            price=Decimal('5.50'),
+            description='Sample recipe description.',
+        )
+
+        self.assertEqual(str(recipe), recipe.title)
