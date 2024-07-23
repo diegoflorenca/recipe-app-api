@@ -6,8 +6,8 @@ on: [push]
 jobs:
   test-list:
     runs:
-    using: 'node20'
-    main: 'main.js'
+      using: 'node20'
+      main: 'main.js'
     runs-on: ubuntu-20.04
     steps:
       - name: Login to Docker Hub
