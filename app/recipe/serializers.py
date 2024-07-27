@@ -27,16 +27,8 @@ class RecipeSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'time_minutes', 'price', 'link', 'tags']
         read_only_fields = ['id']
 
-    def create(self, validated_data):
-        """Create and return a new recipe."""
-        # Extract the tags from the validated data.
-        tags = validated_data.pop('tags', [])
-        """
-        Create the recipe without tags because the
-        Recipe model expects tags to be assigned as a
-        related field.
-        """
-        recipe = Recipe.objects.create(**validated_data)
+    def _get_or_create_tags(self, tags, recipe):
+        """Handle getting or creating tags as needed."""
         """
         Get the authenticated user from the context.
         The context is provided by the view as a parameter.
@@ -50,7 +42,32 @@ class RecipeSerializer(serializers.ModelSerializer):
             )
             recipe.tags.add(tag_obj)
 
+    def create(self, validated_data):
+        """Create and return a new recipe."""
+        # Extract the tags from the validated data.
+        tags = validated_data.pop('tags', [])
+        """
+        Create the recipe without tags because the
+        Recipe model expects tags to be assigned as a
+        related field.
+        """
+        recipe = Recipe.objects.create(**validated_data)
+        self._get_or_create_tags(tags, recipe)
+
         return recipe
+
+    def update(self, instance, validated_data):
+        """Update recipe."""
+        tags = validated_data.pop('tags', None)
+        if tags is not None:
+            instance.tags.clear()
+            self._get_or_create_tags(tags, instance)
+
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+        return instance
 
 
 class RecipeDetailSerializer(RecipeSerializer):
