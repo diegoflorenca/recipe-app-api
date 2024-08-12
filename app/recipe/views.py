@@ -116,6 +116,18 @@ class RecipeViewSet(viewsets.ModelViewSet):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
+@extend_schema_view(
+    list=extend_schema(
+        parameters=[
+            OpenApiParameter(
+                'assigned_only',
+                OpenApiTypes.INT,
+                enum=[0, 1],
+                description='Filter by items assigned to recipes.',
+            ),
+        ]
+    )
+)
 class BasicRecipeAttrViewSet(
     mixins.UpdateModelMixin,
     mixins.DestroyModelMixin,
@@ -128,11 +140,26 @@ class BasicRecipeAttrViewSet(
 
     def get_queryset(self):
         """Filter queryset to authenticated user."""
+        assigned_only = bool(
+            int(self.request.query_params.get('assigned_only', 0))
+        )
+        queryset = self.queryset
+        """
+        Filtering the queryset based on the `assigned_only` parameter.
+        If `assigned_only` is True, then we only want to return tags or 
+        ingredients that are associated with at least one recipe.
+        The `recipe__isnull=False` filter ensures that only tags that 
+        have a related recipe are included in the queryset.
+        """
+        if assigned_only:
+            queryset = queryset.filter(recipe__isnull=False)
         """
         We override the `get_queryset` method in the `viewsets.GenericViewSet`
         class to return only the tags that belong to the authenticated user.
         """
-        return self.queryset.filter(user=self.request.user).order_by('-name')
+        return queryset.filter(
+            user=self.request.user
+        ).order_by('-name').distinct()
 
 
 class TagViewSet(BasicRecipeAttrViewSet):
