@@ -146,9 +146,9 @@ class BasicRecipeAttrViewSet(
         queryset = self.queryset
         """
         Filtering the queryset based on the `assigned_only` parameter.
-        If `assigned_only` is True, then we only want to return tags or 
+        If `assigned_only` is True, then we only want to return tags or
         ingredients that are associated with at least one recipe.
-        The `recipe__isnull=False` filter ensures that only tags that 
+        The `recipe__isnull=False` filter ensures that only tags that
         have a related recipe are included in the queryset.
         """
         if assigned_only:
